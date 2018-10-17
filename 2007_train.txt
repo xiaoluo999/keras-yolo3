@@ -1,0 +1,28 @@
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000012.jpg 156,97,351,270,2
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000017.jpg 185,62,279,199,0 90,78,403,336,17
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000023.jpg 9,230,245,500,1 230,220,334,500,1 2,1,117,369,0 3,2,243,462,0 225,1,334,486,0
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000026.jpg 90,125,337,212,2
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000032.jpg 104,78,375,183,4 133,88,197,123,4 195,180,213,229,0 26,189,44,238,0
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000033.jpg 9,107,499,263,4 421,200,482,226,4 325,188,411,223,4
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000034.jpg 116,167,360,400,6 141,153,333,229,6
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000035.jpg 1,96,191,361,0 218,98,465,318,0
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000036.jpg 27,79,319,344,16
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000042.jpg 263,32,500,295,6 1,36,235,299,6
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000044.jpg 1,1,370,330,56 99,101,312,213,15
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000047.jpg 15,1,459,312,2 439,170,487,230,56
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000048.jpg 58,107,291,465,14 2,1,302,500,0
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000061.jpg 274,11,437,279,8 184,214,281,252,8
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000064.jpg 1,23,451,500,14
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000066.jpg 209,187,228,230,0 242,182,274,259,0 269,188,295,259,0
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000073.jpg 121,143,375,460,58 2,154,64,459,58 270,155,375,331,8 22,143,146,500,0
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000077.jpg 240,1,500,333,15 2,1,306,333,15
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000078.jpg 15,75,475,412,16 94,41,437,238,16
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000083.jpg 109,33,447,309,2 380,2,435,135,0 138,14,193,115,0 1,20,75,204,0 60,48,114,156,0 32,51,83,162,0
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000089.jpg 20,7,183,355,0 98,215,429,374,0 332,140,455,366,0 22,51,317,291,56
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000091.jpg 125,241,195,284,2 81,248,105,268,2 91,250,126,274,2
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000104.jpg 403,110,500,265,62 291,75,442,333,0 2,7,283,333,0
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000112.jpg 70,174,277,328,16 287,162,316,198,56
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000122.jpg 36,20,430,474,15
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000129.jpg 70,202,255,500,1 74,1,272,462,0 252,19,334,487,0
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000133.jpg 73,18,406,500,0 135,227,338,500,17
+E:\project\yolo_V3\YOLOv3-tensorflow\data\pascal_voc\VOCdevkit/VOC2007/JPEGImages/000134.jpg 1,115,487,330,2

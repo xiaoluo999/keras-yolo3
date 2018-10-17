@@ -69,6 +69,7 @@ def get_random_data(annotation_line, input_shape, random=True, max_boxes=20, jit
     # resize image
     new_ar = w/h * rand(1-jitter,1+jitter)/rand(1-jitter,1+jitter)
     scale = rand(.25, 2)
+    # 同比例缩放，将较长边resize
     if new_ar < 1:
         nh = int(scale*h)
         nw = int(nh*new_ar)
@@ -80,8 +81,8 @@ def get_random_data(annotation_line, input_shape, random=True, max_boxes=20, jit
     # place image
     dx = int(rand(0, w-nw))
     dy = int(rand(0, h-nh))
-    new_image = Image.new('RGB', (w,h), (128,128,128))
-    new_image.paste(image, (dx, dy))
+    new_image = Image.new('RGB', (w,h), (128,128,128))#生成灰度图像
+    new_image.paste(image, (dx, dy))#将缩放后的图像，随机放在灰度图像某个位置
     image = new_image
 
     # flip image or not

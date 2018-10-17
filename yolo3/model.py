@@ -18,15 +18,15 @@ from yolo3.utils import compose
 def DarknetConv2D(*args, **kwargs):
     """Wrapper to set Darknet parameters for Convolution2D."""
     darknet_conv_kwargs = {'kernel_regularizer': l2(5e-4)}
-    darknet_conv_kwargs['padding'] = 'valid' if kwargs.get('strides')==(2,2) else 'same'
+    darknet_conv_kwargs['padding'] = 'valid' if kwargs.get('strides')==(2,2) else 'same'#条件表达式
     darknet_conv_kwargs.update(kwargs)
     return Conv2D(*args, **darknet_conv_kwargs)
 
-def DarknetConv2D_BN_Leaky(*args, **kwargs):
+def DarknetConv2D_BN_Leaky(*args, **kwargs):#不定量参数，args无key，kwargs有key值
     """Darknet Convolution2D followed by BatchNormalization and LeakyReLU."""
     no_bias_kwargs = {'use_bias': False}
-    no_bias_kwargs.update(kwargs)
-    return compose(
+    no_bias_kwargs.update(kwargs)#将字典kwargs添加到no_bias字典中
+    return compose(#compose为前一个函数结果作为第二函数的参数
         DarknetConv2D(*args, **no_bias_kwargs),
         BatchNormalization(),
         LeakyReLU(alpha=0.1))
@@ -45,12 +45,12 @@ def resblock_body(x, num_filters, num_blocks):
 
 def darknet_body(x):
     '''Darknent body having 52 Convolution2D layers'''
-    x = DarknetConv2D_BN_Leaky(32, (3,3))(x)
-    x = resblock_body(x, 64, 1)
-    x = resblock_body(x, 128, 2)
-    x = resblock_body(x, 256, 8)
-    x = resblock_body(x, 512, 8)
-    x = resblock_body(x, 1024, 4)
+    x = DarknetConv2D_BN_Leaky(32, (3,3))(x)#x->3*3conv32，1层
+    x = resblock_body(x, 64, 1)#输出节点为64，1个残差模块，1+1*2=3层
+    x = resblock_body(x, 128, 2)#输出节点为128,2个残差模块，5层
+    x = resblock_body(x, 256, 8)#17层
+    x = resblock_body(x, 512, 8)#17层
+    x = resblock_body(x, 1024, 4)#输出为[batch,13,13,1024]，9层
     return x
 
 def make_last_layers(x, num_filters, out_filters):
@@ -63,27 +63,27 @@ def make_last_layers(x, num_filters, out_filters):
             DarknetConv2D_BN_Leaky(num_filters, (1,1)))(x)
     y = compose(
             DarknetConv2D_BN_Leaky(num_filters*2, (3,3)),
-            DarknetConv2D(out_filters, (1,1)))(x)
+            DarknetConv2D(out_filters, (1,1)))(x)#13*13的尺度输出
     return x, y
 
 
 def yolo_body(inputs, num_anchors, num_classes):
     """Create YOLO_V3 model CNN body in Keras."""
-    darknet = Model(inputs, darknet_body(inputs))
-    x, y1 = make_last_layers(darknet.output, 512, num_anchors*(num_classes+5))
+    darknet = Model(inputs, darknet_body(inputs))#前53darket层
+    x, y1 = make_last_layers(darknet.output, 512, num_anchors*(num_classes+5))#y1为13*13尺度的输出
 
     x = compose(
             DarknetConv2D_BN_Leaky(256, (1,1)),
             UpSampling2D(2))(x)
     x = Concatenate()([x,darknet.layers[152].output])
-    x, y2 = make_last_layers(x, 256, num_anchors*(num_classes+5))
+    x, y2 = make_last_layers(x, 256, num_anchors*(num_classes+5))#y2为26*26尺度的输出
 
     x = compose(
             DarknetConv2D_BN_Leaky(128, (1,1)),
             UpSampling2D(2))(x)
     x = Concatenate()([x,darknet.layers[92].output])
     x, y3 = make_last_layers(x, 128, num_anchors*(num_classes+5))
-
+    #y1=(batch,13,13,3*(类别数+5))，y2=(batch,26,26,3*(类别数+5))
     return Model(inputs, [y1,y2,y3])
 
 def tiny_yolo_body(inputs, num_anchors, num_classes):
@@ -376,7 +376,7 @@ def yolo_loss(args, anchors, num_classes, ignore_thresh=.5, print_loss=False):
              anchors[anchor_mask[l]], num_classes, input_shape, calc_loss=True)
         pred_box = K.concatenate([pred_xy, pred_wh])
 
-        # Darknet raw box to calculate loss.
+        # Darknet raw box to calculate loss.将标签0-1数据转为相对栅格和anchor的，存放在raw_true_xy
         raw_true_xy = y_true[l][..., :2]*grid_shapes[l][::-1] - grid
         raw_true_wh = K.log(y_true[l][..., 2:4] / anchors[anchor_mask[l]] * input_shape[::-1])
         raw_true_wh = K.switch(object_mask, raw_true_wh, K.zeros_like(raw_true_wh)) # avoid log(0)=-inf
