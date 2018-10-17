@@ -54,7 +54,7 @@ def _main():
             # use custom yolo_loss Lambda layer.
             'yolo_loss': lambda y_true, y_pred: y_pred})
 
-        batch_size = 1
+        batch_size = 32
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
         #分批训练
         model.fit_generator(data_generator_wrapper(lines[:num_train], batch_size, input_shape, anchors, num_classes),
@@ -107,8 +107,8 @@ def create_model(input_shape, anchors, num_classes, load_pretrained=True, freeze
             weights_path='model_data/yolo_weights.h5'):
     '''create the training model'''
     K.clear_session() # get a new session
-    image_input = Input(shape=(416, 416, 3))
-    h, w = input_shape#416,416
+    image_input = Input(shape=(None, None, 3))
+    h, w = input_shape
     num_anchors = len(anchors)
     # y_true为列表，3个元素，元素的shape为[101,栅格数量,栅格数量,3,class+5]
     y_true = [Input(shape=(h//{0:32, 1:16, 2:8}[l], w//{0:32, 1:16, 2:8}[l], \
