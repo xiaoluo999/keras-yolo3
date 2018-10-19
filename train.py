@@ -16,8 +16,8 @@ from yolo3.utils import get_random_data
 def _main():
     annotation_path = '2007_train.txt'
     log_dir = 'logs/000/'
-    classes_path = 'model_data/coco_classes.txt'#20个类别名
-    anchors_path = 'model_data/yolo_anchors.txt'#9个anchor box大小
+    classes_path = 'model_data/voc_classes.txt'#20个类别名
+    anchors_path = 'model_data/tiny_yolo_anchors.txt'#9个anchor box大小
     class_names = get_classes(classes_path)#返回真实类名列表
     num_classes = len(class_names)#类别数
     anchors = get_anchors(anchors_path)#np.array:9*2
@@ -27,15 +27,39 @@ def _main():
     is_tiny_version = len(anchors)==6 # default setting
     if is_tiny_version:
         model = create_tiny_model(input_shape, anchors, num_classes,
-            freeze_body=2, weights_path='model_data/tiny_yolo_weights.h5')
+            freeze_body=2, weights_path='model_data/yolo-tiny.h5')
     else:
         model = create_model(input_shape, anchors, num_classes,
             freeze_body=2, weights_path='model_data/yolo_weights.h5') # make sure you know what you freeze
-
+    #保存event文件
     logging = TensorBoard(log_dir=log_dir)
+    #keras.callbacks.ModelCheckpoint实现实时保存训练模型以及训练参数
+    #其中： 
+    #1. filename：字符串，保存模型的路径 
+    #2. monitor：需要监视的值 
+    #3. verbose：信息展示模式，0或1 
+    #4. save_best_only：当设置为True时，将只保存在验证集上性能最好的模型，一般我们都会设置为True. 
+    #5. mode：‘auto’，‘min’，‘max’之一，在save_best_only=True时决定性能最佳模型的评判准则，默认为auto
+    #   例如，当监测值为val_acc时，模式应为max，当检测值为val_loss时，模式应为min。在auto模式下，评价准则由被监测值的名字自动推断。 
+    #6. save_weights_only：若设置为True，则只保存模型权重，否则将保存整个模型（包括模型结构，配置信息等） 
+    #7. period：CheckPoint之间的间隔的epoch数
     checkpoint = ModelCheckpoint(log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',
         monitor='val_loss', save_weights_only=True, save_best_only=True, period=3)
+    #   LearningRateSchedule学习率动态调整
+    #1. monitor：被监测的量 
+    #2. factor：每次减少学习率的因子，学习率将以lr = lr*factor的形式被减少 
+    #3. patience：当patience个epoch过去而模型性能不提升时，学习率减少的动作会被触发 
+    #4. mode：‘auto’，‘min’，‘max’之一，在min模式下，如果检测值触发学习率减少。在max模式下，当检测值不再上升则触发学习率减少。 
+    #5. epsilon：阈值，用来确定是否进入检测值的“平原区” 
+    #6. cooldown：学习率减少后，会经过cooldown个epoch才重新进行正常操作 
+    #7. min_lr：学习率的下限
+    #当学习停滞时，减少2倍或10倍的学习率常常能获得较好的效果
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=3, verbose=1)
+    #
+    #1. monitor：需要监视的量 
+    #2. patience：当early stop被激活（如发现loss相比上一个epoch训练没有下降），则经过patience个epoch后停止训练。 
+    #3. verbose：信息展示模式 
+    #4. mode：‘auto’，‘min’，‘max’之一，在min模式下，如果检测值停止下降则中止训练。在max模式下，当检测值不再上升则停止训练。
     early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1)
 
     val_split = 0.1
@@ -48,13 +72,13 @@ def _main():
     num_train = len(lines) - num_val
 
     # Train with frozen layers first, to get a stable loss.
-    # Adjust num epochs to your dataset. This step is enough to obtain a not bad model.
+    # Adjust num epochs to your dataset. This step is enough to obtain a not bad model.'
     if True:#只训练三个输出层的参数
         model.compile(optimizer=Adam(lr=1e-3), loss={
             # use custom yolo_loss Lambda layer.
             'yolo_loss': lambda y_true, y_pred: y_pred})
 
-        batch_size = 32
+        batch_size =32
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
         #分批训练
         model.fit_generator(data_generator_wrapper(lines[:num_train], batch_size, input_shape, anchors, num_classes),
@@ -68,13 +92,13 @@ def _main():
 
     # Unfreeze and continue training, to fine-tune.
     # Train longer if the result is not good.
-    if True:#训练所有参数
+    if False:#训练所有参数
         for i in range(len(model.layers)):
             model.layers[i].trainable = True
         model.compile(optimizer=Adam(lr=1e-4), loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # recompile to apply the change
         print('Unfreeze all of the layers.')
 
-        batch_size = 32 # note that more GPU memory is required after unfreezing the body
+        batch_size = 8 # note that more GPU memory is required after unfreezing the body
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
         model.fit_generator(data_generator_wrapper(lines[:num_train], batch_size, input_shape, anchors, num_classes),
             steps_per_epoch=max(1, num_train//batch_size),
@@ -84,7 +108,6 @@ def _main():
             initial_epoch=50,
             callbacks=[logging, checkpoint, reduce_lr, early_stopping])
         model.save_weights(log_dir + 'trained_weights_final.h5')
-
     # Further training if needed.
 
 
