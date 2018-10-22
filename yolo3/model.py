@@ -175,11 +175,11 @@ def yolo_correct_boxes(box_xy, box_wh, input_shape, image_shape):
 
 def yolo_boxes_and_scores(feats, anchors, num_classes, input_shape, image_shape):
     '''Process Conv layer output'''
-    box_xy, box_wh, box_confidence, box_class_probs = yolo_head(feats,
+    box_xy, box_wh, box_confidence, box_class_probs = yolo_head(feats,#将网络输出转为相对416比例的坐标
         anchors, num_classes, input_shape)
-    boxes = yolo_correct_boxes(box_xy, box_wh, input_shape, image_shape)
+    boxes = yolo_correct_boxes(box_xy, box_wh, input_shape, image_shape)#将坐标转为原图实际坐标
     boxes = K.reshape(boxes, [-1, 4])
-    box_scores = box_confidence * box_class_probs
+    box_scores = box_confidence * box_class_probs#anchor得分=每个anchor的置信度*类别概率
     box_scores = K.reshape(box_scores, [-1, num_classes])
     return boxes, box_scores
 
@@ -191,12 +191,14 @@ def yolo_eval(yolo_outputs,
               max_boxes=20,
               score_threshold=.6,
               iou_threshold=.5):
+    #y1=(batch,13,13,3*(类别数+5))，y2=(batch,26,26,3*(类别数+5))
     """Evaluate YOLO model on given input and return filtered boxes."""
     num_layers = len(yolo_outputs)
     anchor_mask = [[6,7,8], [3,4,5], [0,1,2]] if num_layers==3 else [[3,4,5], [1,2,3]] # default setting
     input_shape = K.shape(yolo_outputs[0])[1:3] * 32
     boxes = []
     box_scores = []
+    #将网络输出[y1,y2,y3]转为
     for l in range(num_layers):
         _boxes, _box_scores = yolo_boxes_and_scores(yolo_outputs[l],
             anchors[anchor_mask[l]], num_classes, input_shape, image_shape)
@@ -204,7 +206,7 @@ def yolo_eval(yolo_outputs,
         box_scores.append(_box_scores)
     boxes = K.concatenate(boxes, axis=0)
     box_scores = K.concatenate(box_scores, axis=0)
-
+    #通过score_threshold阈值来判断该anchor是否含有目标
     mask = box_scores >= score_threshold
     max_boxes_tensor = K.constant(max_boxes, dtype='int32')
     boxes_ = []
@@ -214,6 +216,10 @@ def yolo_eval(yolo_outputs,
         # TODO: use keras backend instead of tf.
         class_boxes = tf.boolean_mask(boxes, mask[:, c])
         class_box_scores = tf.boolean_mask(box_scores[:, c], mask[:, c])
+        #一个目标可能被多次检测，那么可以采用非极大值抑制算法NMS（non maximum suppression)算法来解决。
+        # 首先从所有的检测框中找到置信度较大的那个框，然后挨个计算其与剩余框的IOU，
+        # 如果其值大于iou_threshold（重合度过高），那么就将该框剔除；然后对剩余的检测框重复上述过程，
+        # 直到处理完所有的检测框。
         nms_index = tf.image.non_max_suppression(
             class_boxes, class_box_scores, max_boxes_tensor, iou_threshold=iou_threshold)
         class_boxes = K.gather(class_boxes, nms_index)

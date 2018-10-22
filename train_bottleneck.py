@@ -14,9 +14,9 @@ from yolo3.utils import get_random_data
 
 
 def _main():
-    annotation_path = 'train.txt'
+    annotation_path = '2007_train_person.txt'
     log_dir = 'logs/000/'
-    classes_path = 'model_data/coco_classes.txt'
+    classes_path = 'model_data/voc_classes_person.txt'
     anchors_path = 'model_data/yolo_anchors.txt'
     class_names = get_classes(classes_path)
     num_classes = len(class_names)
@@ -25,7 +25,7 @@ def _main():
     input_shape = (416,416) # multiple of 32, hw
 
     model, bottleneck_model, last_layer_model = create_model(input_shape, anchors, num_classes,
-            freeze_body=2, weights_path='model_data/yolo_weights.h5') # make sure you know what you freeze
+            freeze_body=2, weights_path='model_data/yolov3.h5') # make sure you know what you freeze
 
     logging = TensorBoard(log_dir=log_dir)
     checkpoint = ModelCheckpoint(log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',
@@ -72,6 +72,8 @@ def _main():
         model.save_weights(log_dir + 'trained_weights_stage_0.h5')
         
         # train last layers with random augmented data
+        #损失函数loss：该参数为模型试图最小化的目标函数，它可为预定义的损失函数名，
+        # 如categorical_crossentropy、mse，也可以为一个损失函数。详情见losses
         model.compile(optimizer=Adam(lr=1e-3), loss={
             # use custom yolo_loss Lambda layer.
             'yolo_loss': lambda y_true, y_pred: y_pred})

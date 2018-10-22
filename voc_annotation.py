@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from os import getcwd
 
 sets=[('2007', 'train'), ('2007', 'val')]
-
+#如果只检测一类，改下面列表即可
 classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
