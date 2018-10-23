@@ -17,7 +17,7 @@ def _main():
     annotation_path = '2007_train.txt'
     log_dir = 'logs/000/'
     classes_path = 'model_data/voc_classes.txt'#20个类别名
-    anchors_path = 'model_data/tiny_yolo_anchors.txt'#9个anchor box大小
+    anchors_path = 'model_data/yolo_anchors.txt'#9个anchor box大小
     class_names = get_classes(classes_path)#返回真实类名列表
     num_classes = len(class_names)#类别数
     anchors = get_anchors(anchors_path)#np.array:9*2
@@ -30,7 +30,7 @@ def _main():
             freeze_body=2, weights_path='model_data/yolo-tiny.h5')
     else:
         model = create_model(input_shape, anchors, num_classes,
-            freeze_body=2, weights_path='model_data/yolo_weights.h5') # make sure you know what you freeze
+            freeze_body=2, weights_path='model_data/yolov3.h5') # make sure you know what you freeze
     #保存event文件
     logging = TensorBoard(log_dir=log_dir)
     #keras.callbacks.ModelCheckpoint实现实时保存训练模型以及训练参数
@@ -130,7 +130,7 @@ def create_model(input_shape, anchors, num_classes, load_pretrained=True, freeze
             weights_path='model_data/yolo_weights.h5'):
     '''create the training model'''
     K.clear_session() # get a new session
-    image_input = Input(shape=(None, None, 3))
+    image_input = Input(shape=(None, None, 3))#相当于定义了一个shape为(batch_size,None,None,3)大小的placeholder
     h, w = input_shape
     num_anchors = len(anchors)
     # y_true为列表，3个元素，元素的shape为[101,栅格数量,栅格数量,3,class+5]
@@ -142,14 +142,14 @@ def create_model(input_shape, anchors, num_classes, load_pretrained=True, freeze
     print('Create YOLOv3 model with {} anchors and {} classes.'.format(num_anchors, num_classes))
 
     if load_pretrained:
-        model_body.load_weights(weights_path, by_name=True, skip_mismatch=True)
+        model_body.load_weights(weights_path, by_name=True, skip_mismatch=True)#加载权重文件
         print('Load weights {}.'.format(weights_path))
         if freeze_body in [1, 2]:#freeze_body=1表示darknet53训练参数固定，2表示除了最后3个输出层，其余参数全部固定
             # Freeze darknet53 body or freeze all but 3 output layers.
-            num = (185, len(model_body.layers)-3)[freeze_body-1]
+            num = (185, len(model_body.layers)-3)[freeze_body-1]#model_body一共252层，其中249层为conv59,250-conv67,251-conv75
             for i in range(num): model_body.layers[i].trainable = False
             print('Freeze the first {} layers of total {} layers.'.format(num, len(model_body.layers)))
-
+    #使用keras.Lambda定义损失函数yolo_loss
     model_loss = Lambda(yolo_loss, output_shape=(1,), name='yolo_loss',
         arguments={'anchors': anchors, 'num_classes': num_classes, 'ignore_thresh': 0.5})(
         [*model_body.output, *y_true])
