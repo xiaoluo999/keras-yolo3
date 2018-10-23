@@ -365,8 +365,8 @@ def yolo_loss(args, anchors, num_classes, ignore_thresh=.5, print_loss=False):
 
     '''
     num_layers = len(anchors)//3 # default setting
-    yolo_outputs = args[:num_layers]
-    y_true = args[num_layers:]
+    yolo_outputs = args[:num_layers]#网络输出[y1,y2,y3],y1=(batch,13,13,3*(类别数+5))，y2=(batch,26,26,3*(类别数+5))
+    y_true = args[num_layers:]#label，y_true为列表，3个元素，元素的shape为[101,栅格数量,栅格数量,3,class+5]
     anchor_mask = [[6,7,8], [3,4,5], [0,1,2]] if num_layers==3 else [[3,4,5], [1,2,3]]
     input_shape = K.cast(K.shape(yolo_outputs[0])[1:3] * 32, K.dtype(y_true[0]))
     grid_shapes = [K.cast(K.shape(yolo_outputs[l])[1:3], K.dtype(y_true[0])) for l in range(num_layers)]
@@ -377,7 +377,10 @@ def yolo_loss(args, anchors, num_classes, ignore_thresh=.5, print_loss=False):
     for l in range(num_layers):
         object_mask = y_true[l][..., 4:5]
         true_class_probs = y_true[l][..., 5:]
-
+        #grid =
+        #raw_pred = [batch,栅格数目，栅格数目，3，class+5],网络直接输出，只是形状变换
+        #pred_xy = [batch,栅格数目，栅格数目，3，2],网络输出坐标经过sigmoid激活
+        #pred_wh = [batch,栅格数目，栅格数目，3，2]，网络输出坐标经过指数激活
         grid, raw_pred, pred_xy, pred_wh = yolo_head(yolo_outputs[l],
              anchors[anchor_mask[l]], num_classes, input_shape, calc_loss=True)
         pred_box = K.concatenate([pred_xy, pred_wh])
