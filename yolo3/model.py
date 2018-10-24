@@ -348,7 +348,7 @@ def box_iou(b1, b2):
     return iou
 
 
-def yolo_loss(args, anchors, num_classes, ignore_thresh=.5, print_loss=False):
+def yolo_loss(args, anchors, num_classes, ignore_thresh=.5, print_loss=True):
     '''Return yolo_loss tensor
 
     Parameters
@@ -377,7 +377,7 @@ def yolo_loss(args, anchors, num_classes, ignore_thresh=.5, print_loss=False):
     for l in range(num_layers):
         object_mask = y_true[l][..., 4:5]
         true_class_probs = y_true[l][..., 5:]
-        #grid =
+        #grid = [栅格数量,栅格数量,1,3]
         #raw_pred = [batch,栅格数目，栅格数目，3，class+5],网络直接输出，只是形状变换
         #pred_xy = [batch,栅格数目，栅格数目，3，2],网络输出坐标经过sigmoid激活
         #pred_wh = [batch,栅格数目，栅格数目，3，2]，网络输出坐标经过指数激活
