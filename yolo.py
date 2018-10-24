@@ -23,7 +23,7 @@ class YOLO(object):
         "model_path": r"./model_data/yolov3.h5",
         "anchors_path": r"./model_data/yolo_anchors.txt",
         "classes_path": r"./model_data/coco_classes.txt",
-        "score" : 0.3,#置信度阈值，如果小于该值，则认为该anchor中没有目标
+        "score" : 0.1,#置信度阈值，如果小于该值，则认为该anchor中没有目标
         "iou" : 0.45,#一个目标被多次检测，采用NMS方法需要的参数
         "model_image_size" : (416, 416),
         "gpu_num" : 1,

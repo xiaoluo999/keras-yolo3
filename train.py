@@ -17,7 +17,7 @@ def _main():
     annotation_path = '2007_train.txt'
     log_dir = 'logs/000/'
     classes_path = 'model_data/voc_classes.txt'#20个类别名
-    anchors_path = 'model_data/yolo_anchors.txt'#9个anchor box大小
+    anchors_path = 'model_data/tiny_yolo_anchors.txt'#9个anchor box大小
     class_names = get_classes(classes_path)#返回真实类名列表
     num_classes = len(class_names)#类别数
     anchors = get_anchors(anchors_path)#np.array:9*2
@@ -48,7 +48,7 @@ def _main():
     #   LearningRateSchedule学习率动态调整
     #1. monitor：被监测的量 
     #2. factor：每次减少学习率的因子，学习率将以lr = lr*factor的形式被减少 
-    #3. patience：当patience个epoch过去而模型性能不提升时，学习率减少的动作会被触发 
+    #3. patience：如果在patience个epoch中看不到模型性能提升，则减少学习率。
     #4. mode：‘auto’，‘min’，‘max’之一，在min模式下，如果检测值触发学习率减少。在max模式下，当检测值不再上升则触发学习率减少。 
     #5. epsilon：阈值，用来确定是否进入检测值的“平原区” 
     #6. cooldown：学习率减少后，会经过cooldown个epoch才重新进行正常操作 
@@ -176,6 +176,7 @@ def create_tiny_model(input_shape, anchors, num_classes, load_pretrained=True, f
         print('Load weights {}.'.format(weights_path))
         if freeze_body in [1, 2]:
             # Freeze the darknet body or freeze all but 2 output layers.
+            print(model_body.layers)
             num = (20, len(model_body.layers)-2)[freeze_body-1]
             for i in range(num): model_body.layers[i].trainable = False
             print('Freeze the first {} layers of total {} layers.'.format(num, len(model_body.layers)))
@@ -197,7 +198,7 @@ def data_generator(annotation_lines, batch_size, input_shape, anchors, num_class
         for b in range(batch_size):
             if i==0:
                 np.random.shuffle(annotation_lines)
-            image, box = get_random_data(annotation_lines[i], input_shape, random=True)
+            image, box = get_random_data(annotation_lines[i], input_shape, random=False)
             image_data.append(image)
             box_data.append(box)
             i = (i+1) % n
@@ -205,6 +206,13 @@ def data_generator(annotation_lines, batch_size, input_shape, anchors, num_class
         box_data = np.array(box_data)
         # y_true为列表，3个元素，元素的shape为[101,栅格数量,栅格数量,3,85]
         y_true = preprocess_true_boxes(box_data, input_shape, anchors, num_classes)
+        #yield 的作用就是把一个函数变成一个generator，带有yield 的函数不再是一个普通函数，
+        # Python解释器会将其视为一个generator，调用fab(5)不会执行fab函数，而是返回一个iterable对象！
+        #在for 循环执行时，每次循环都会执行 fab 函数内部的代码，
+        # 执行到 yield b 时，fab 函数就返回一个迭代值，下次迭代时，
+        # 代码从 yield b 的下一条语句继续执行，
+        # 而函数的本地变量看起来和上次中断执行前是完全一样的，
+        # 于是函数继续执行，直到再次遇到 yield 。
         yield [image_data, *y_true], np.zeros(batch_size)
 
 def data_generator_wrapper(annotation_lines, batch_size, input_shape, anchors, num_classes):

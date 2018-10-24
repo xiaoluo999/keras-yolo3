@@ -5,10 +5,10 @@ from PIL import Image
 import glob
 import os
 import cv2
+import numpy as np
 def detect_img(yolo):
     while True:
-        #img = input('Input image filename:')
-        img = r"./1.jpg"
+        img = input('Input image filename:')
         try:
             image = Image.open(img)
         except:
@@ -19,9 +19,18 @@ def detect_img(yolo):
             r_image.show()
     yolo.close_session()
 
+def detect_img1(yolo,path):
+    image = Image.open(path)
+    r_image = yolo.detect_image(image)
+    r_image.show()
+    yolo.close_session()
+
 def detect_img_batch(yolo,image_dir):
     path_list = glob.glob(os.path.join(image_dir,"*.jpg"))
     for path in path_list:
+        image = cv2.imread(path)
+        if isinstance(image,np.ndarray)==False:
+            continue
         image = Image.open(path)
         r_image = yolo.detect_image(image)
         r_image.show()
@@ -73,11 +82,11 @@ if __name__ == '__main__':
     )
 
     FLAGS = parser.parse_args()
-    FLAGS.model_path = r"E:\project\yolo_V3\keras-yolo3\model_data\trained_weights_stage_1.h5"
-    FLAGS.anchors_path = r"E:\project\yolo_V3\keras-yolo3\model_data\yolo_anchors.txt"
+    FLAGS.model_path = r"E:\project\yolo_V3\keras-yolo3\model_data\20181024\trained_weights_final_tiny.h5"
+    FLAGS.anchors_path = r"E:\project\yolo_V3\keras-yolo3\model_data\tiny_yolo_anchors.txt"
     FLAGS.classes_path = r"E:\project\yolo_V3\keras-yolo3\model_data\voc_classes_person.txt"
     FLAGS.image = True
-    FLAGS.input = "./1.jpg"
+    FLAGS.input = r"E:\project\helmet\data\gao\yellow"
     if FLAGS.image:
         """
         Image detection mode, disregard any remaining command line arguments
@@ -85,8 +94,8 @@ if __name__ == '__main__':
         print("Image detection mode")
         if "input" in FLAGS:
             print(" Ignoring remaining command line arguments: " + FLAGS.input + "," + FLAGS.output)
-        #detect_img(YOLO(**vars(FLAGS)))#返回属性和属性值的字典对象
-        detect_img_batch(YOLO(**vars(FLAGS)),r"E:\project\yolo_V3\keras-yolo3\images")
+        #detect_img1(YOLO(**vars(FLAGS)),'E:\project\yolo_V3\keras-yolo3\JPEGImages\JPEGImages\PartB_00761.jpg')#返回属性和属性值的字典对象
+        detect_img_batch(YOLO(**vars(FLAGS)),FLAGS.input)
     elif "input" in FLAGS:
         detect_video(YOLO(**vars(FLAGS)), FLAGS.input, FLAGS.output)
     else:
